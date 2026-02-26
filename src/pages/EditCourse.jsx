@@ -5,6 +5,7 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Trash, Plus } from 'lucide-react';
+import { normalizeYouTubeUrlForEmbed } from '../utils/youtube';
 
 export const EditCourse = () => {
     const { courses, updateCourse } = useCourses();
@@ -75,7 +76,21 @@ export const EditCourse = () => {
         e.preventDefault();
         if (!formData.title || !formData.description) return; // Simple validation
 
-        updateCourse(formData);
+        const normalizedModules = formData.modules.map(module => {
+            if ((module.videoSource || 'youtube') !== 'youtube') {
+                return module;
+            }
+
+            return {
+                ...module,
+                videoUrl: normalizeYouTubeUrlForEmbed(module.videoUrl)
+            };
+        });
+
+        updateCourse({
+            ...formData,
+            modules: normalizedModules
+        });
         navigate('/educator');
     };
 

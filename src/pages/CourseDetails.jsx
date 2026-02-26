@@ -6,6 +6,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { CheckCircle, PlayCircle, FileText, Upload } from 'lucide-react';
+import { normalizeYouTubeUrlForEmbed } from '../utils/youtube';
 
 export const CourseDetails = () => {
     const { courseId } = useParams();
@@ -20,6 +21,11 @@ export const CourseDetails = () => {
 
     const modules = course.modules || [];
     const currentModule = modules[activeModule];
+    const currentModuleVideoUrl = currentModule
+        ? (currentModule.videoSource || 'youtube') === 'upload'
+            ? currentModule.videoUrl
+            : normalizeYouTubeUrlForEmbed(currentModule.videoUrl)
+        : '';
     const completedModules = getCompletedModules(user.id, courseId);
     const assignmentScore = getAssignmentScore(user.id, courseId);
     const assignmentGraded = isAssignmentGraded(user.id, courseId);
@@ -110,13 +116,13 @@ export const CourseDetails = () => {
                     </div>
 
                     {/* Video Player or Content */}
-                    {currentModule && currentModule.videoUrl ? (
+                    {currentModule && currentModuleVideoUrl ? (
                         <div style={{ marginBottom: '2rem' }}>
                             {(currentModule.videoSource || 'youtube') === 'upload' ? (
                                 <video
                                     controls
                                     style={{ width: '100%', borderRadius: 'var(--radius-lg)', background: 'var(--gray-900)' }}
-                                    src={currentModule.videoUrl}
+                                    src={currentModuleVideoUrl}
                                 />
                             ) : (
                                 <div style={{ 
@@ -136,7 +142,7 @@ export const CourseDetails = () => {
                                             height: '100%',
                                             border: 'none'
                                         }}
-                                        src={currentModule.videoUrl}
+                                        src={currentModuleVideoUrl}
                                         title={currentModule.title}
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         allowFullScreen
